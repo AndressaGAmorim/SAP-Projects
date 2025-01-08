@@ -1,0 +1,4 @@
+000	Sem Horários de Vôos para: &1 &2
+001	Sem Vôos para: &
+002	Você deu duplo clique na coluna &1 e linha &2
+003	Não existe nenhuma Companhia aérea cadastrada!

@@ -1,0 +1,25 @@
+*&---------------------------------------------------------------------*
+*& Report ZDEV0027
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zaga_voos MESSAGE-ID zaga.
+
+INCLUDE: zaga_voos_top,
+         zaga_voos_lcl,
+         zaga_voos_pbo,
+         zaga_voos_pai.
+
+START-OF-SELECTION.
+* Chama todas as Companhias Aéreas
+  SELECT *
+    FROM scarr
+    INTO TABLE it_scarr.
+
+* Exibe mensagem de erro caso não seja encontrado nenhum registro na SCARR
+  IF sy-subrc NE 0.
+    MESSAGE e003 DISPLAY LIKE 'I'.
+  ENDIF.
+
+* Chama a tela
+  CALL SCREEN 1000.

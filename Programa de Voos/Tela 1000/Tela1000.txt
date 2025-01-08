@@ -1,0 +1,11 @@
+PROCESS BEFORE OUTPUT.
+  MODULE: status_1000,
+          create_alv.
+
+  CALL SUBSCREEN sub INCLUDING sy-repid gv_dynnr.
+
+PROCESS AFTER INPUT.
+
+  CALL SUBSCREEN sub.
+
+  MODULE: user_command_1000.

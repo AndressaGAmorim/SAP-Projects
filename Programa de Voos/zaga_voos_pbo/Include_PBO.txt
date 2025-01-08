@@ -1,0 +1,145 @@
+*&---------------------------------------------------------------------*
+*& Include ZDEV0027_PBO
+*&---------------------------------------------------------------------*
+
+*&---------------------------------------------------------------------*
+*& Module STATUS_1000 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_1000 OUTPUT.
+  SET PF-STATUS 'PF1000'.
+  SET TITLEBAR '1000'.
+ENDMODULE.
+
+*&---------------------------------------------------------------------*
+*& Module CREATE_ALV OUTPUT
+*&---------------------------------------------------------------------*
+MODULE create_alv OUTPUT.
+  CHECK gr_container1 IS NOT BOUND.
+
+  DATA: lr_handle TYPE REF TO lcl_event_handler,
+        ls_layout TYPE        lvc_s_layo.
+
+* Cria objetos container
+  CREATE OBJECT: gr_container1 EXPORTING container_name = 'CONTAINER_SCARR',
+                 gr_container2 EXPORTING container_name = 'CONTAINER_SPFLI',
+                 gr_container3 EXPORTING container_name = 'CONTAINER_SFLIGHT'.
+
+* Cria objetos para os grids
+  CREATE OBJECT: gr_grid_scarr   EXPORTING i_parent = gr_container1,
+                 gr_grid_spfli   EXPORTING i_parent = gr_container2,
+                 gr_grid_sflight EXPORTING i_parent = gr_container3.
+
+* Cria objeto da nossa classe de event handler
+  CREATE OBJECT lr_handle.
+
+* Faz o handler dos métodos
+  SET HANDLER: lr_handle->on_double_click  FOR gr_grid_scarr,
+               lr_handle->on_hotspot_click FOR gr_grid_scarr,
+               lr_handle->on_double_click  FOR gr_grid_spfli,
+               lr_handle->on_hotspot_click FOR gr_grid_spfli,
+               lr_handle->on_double_click  FOR gr_grid_sflight.
+
+* Configura o layout e inicia os ALVs
+  ls_layout-cwidth_opt = abap_true.
+  ls_layout-zebra      = abap_true.
+  ls_layout-keyhot     = abap_true.
+
+  CALL METHOD gr_grid_scarr->set_table_for_first_display
+    EXPORTING
+      i_structure_name = 'SCARR'
+      is_layout        = ls_layout
+    CHANGING
+      it_outtab        = it_scarr.
+
+  ls_layout-cwidth_opt = abap_false.
+
+  CALL METHOD gr_grid_spfli->set_table_for_first_display
+    EXPORTING
+      i_structure_name = 'SPFLI'
+      is_layout        = ls_layout
+    CHANGING
+      it_outtab        = it_spfli.
+
+  ls_layout-keyhot = abap_false.
+
+  CALL METHOD gr_grid_sflight->set_table_for_first_display
+    EXPORTING
+      i_structure_name = 'SFLIGHT'
+      is_layout        = ls_layout
+    CHANGING
+      it_outtab        = it_sflight.
+ENDMODULE.
+
+**&---------------------------------------------------------------------*
+**& Module GET_SELECT_ROW OUTPUT
+**&---------------------------------------------------------------------*
+*MODULE get_select_row OUTPUT.
+*  CASE number.
+*    WHEN '1002'.
+*      PERFORM selected_grid_1002.
+*    WHEN '1003'.
+*      PERFORM selected_grid_1003.
+*  ENDCASE.
+*ENDMODULE.
+**&---------------------------------------------------------------------*
+**& Form selected_grid_1002
+**&---------------------------------------------------------------------*
+**& text
+**&---------------------------------------------------------------------*
+**& -->  p1        text
+**& <--  p2        text
+**&---------------------------------------------------------------------*
+*FORM selected_grid_1002 .
+*  DATA: lt_row_no TYPE lvc_t_roid,
+*        st_row_no TYPE lvc_s_roid,
+*        st_scarr  LIKE LINE OF it_scarr.
+*
+*  CALL METHOD r_grid_scarr->get_selected_rows
+*    IMPORTING
+*      et_row_no = lt_row_no.
+*
+*  CHECK lt_row_no IS NOT INITIAL.
+*  READ TABLE lt_row_no INTO st_row_no INDEX 1.
+*
+** Recupera a linha selecionada no grid da SCARR
+*  READ TABLE it_scarr INTO st_scarr INDEX st_row_no-row_id.
+*
+** Seleciona os itens de Horáerio de Vôos
+*  SELECT * FROM spfli INTO TABLE it_spfli
+*    WHERE carrid = st_scarr-carrid.
+*
+** Atualiza o grid dos itens de Horários de Vôos
+*  CALL METHOD r_grid_spfli->refresh_table_display.
+*ENDFORM.
+**&---------------------------------------------------------------------*
+**& Form selected_grid_1003
+**&---------------------------------------------------------------------*
+**& text
+**&---------------------------------------------------------------------*
+**& -->  p1        text
+**& <--  p2        text
+**&---------------------------------------------------------------------*
+*FORM selected_grid_1003 .
+*  DATA: lt_row_no TYPE lvc_t_roid,
+*        st_row_no TYPE lvc_s_roid,
+*        st_spfli  LIKE LINE OF it_spfli.
+*
+*  CALL METHOD r_grid_spfli->get_selected_rows
+*    IMPORTING
+*      et_row_no = lt_row_no.
+*
+*  CHECK lt_row_no IS NOT INITIAL.
+*  READ TABLE lt_row_no INTO st_row_no INDEX 1.
+*
+** Recupera a linha selecionada no grid da SCARR
+*  READ TABLE it_spfli INTO st_spfli INDEX st_row_no-row_id.
+*
+** Seleciona os itens de Horáerio de Vôos
+*  SELECT * FROM sflight INTO TABLE it_sflight
+*    WHERE connid = st_spfli-connid.
+*
+** Atualiza o grid dos itens de Horários de Vôos
+*  CALL METHOD r_grid_sflight->refresh_table_display.
+*ENDFORM.

@@ -1,0 +1,18 @@
+*&---------------------------------------------------------------------*
+*& Include          ZAGA_VOOS_TOP
+*&---------------------------------------------------------------------*
+CONTROLS mytabstrip TYPE TABSTRIP.
+
+* Cria referências para os objetos
+DATA: gr_container1   TYPE REF TO cl_gui_custom_container,
+      gr_container2   TYPE REF TO cl_gui_custom_container,
+      gr_container3   TYPE REF TO cl_gui_custom_container,
+      gr_grid_scarr   TYPE REF TO cl_gui_alv_grid,
+      gr_grid_spfli   TYPE REF TO cl_gui_alv_grid,
+      gr_grid_sflight TYPE REF TO cl_gui_alv_grid.
+
+DATA: it_scarr   TYPE STANDARD TABLE OF scarr,
+      it_spfli   TYPE STANDARD TABLE OF spfli,
+      it_sflight TYPE STANDARD TABLE OF sflight,
+      gv_ok_code TYPE sy-ucomm,
+      gv_dynnr   TYPE sy-dynnr VALUE '1001'.

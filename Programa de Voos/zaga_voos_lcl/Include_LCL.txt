@@ -1,0 +1,71 @@
+*&---------------------------------------------------------------------*
+*& Include          ZAGA_VOOS_LCL
+*&---------------------------------------------------------------------*
+*----------------------------------------------------------------------*
+*       CLASS lcl_event_handler DEFINITION
+*----------------------------------------------------------------------*
+CLASS lcl_event_handler DEFINITION.
+  PUBLIC SECTION.
+    METHODS: on_double_click FOR EVENT double_click OF cl_gui_alv_grid
+      IMPORTING e_column es_row_no.
+
+    METHODS: on_hotspot_click FOR EVENT hotspot_click OF cl_gui_alv_grid
+      IMPORTING e_column_id es_row_no.
+ENDCLASS.                    "lcl_event_handler DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS lcl_event_handler IMPLEMENTATION
+*----------------------------------------------------------------------*
+CLASS lcl_event_handler IMPLEMENTATION.
+  METHOD on_double_click.
+* Exibe a mensagem de double click
+    MESSAGE i002 DISPLAY LIKE 'S' WITH e_column es_row_no-row_id.
+  ENDMETHOD.                    "on_double_click
+
+  METHOD on_hotspot_click.
+    IF gv_dynnr EQ '1001'.
+* Limpa a sujeira dos itens de Horários de Vôos e de Vôos
+      CLEAR: it_spfli, it_sflight.
+
+* recupera dados no grid da scarr
+      READ TABLE it_scarr INTO DATA(wa_scarr) INDEX es_row_no-row_id.
+
+* Seleciona os itens de Horáerio de Vôos
+      SELECT *
+        FROM spfli
+        INTO TABLE it_spfli
+          WHERE carrid = wa_scarr-carrid.
+
+* Caso não sejam encontrados registros exibe mensagem de INFORMATION
+      IF sy-subrc NE 0.
+        MESSAGE i000 WITH wa_scarr-carrid wa_scarr-carrname.
+      ENDIF.
+
+* Atualiza os itens de Horários de Vôos e de Vôos
+      CALL METHOD: gr_grid_spfli->refresh_table_display,
+                   gr_grid_sflight->refresh_table_display.
+
+    ELSE.
+* Limpa a sujeira dos itens de Vôo
+      CLEAR it_sflight.
+
+* Recupera dados no grid da spfli
+      READ TABLE it_spfli INTO DATA(wa_spfli) INDEX  es_row_no-row_id.
+
+* Seleciona os itens de Vôo
+      SELECT *
+        FROM sflight
+        INTO TABLE it_sflight
+          WHERE connid = wa_spfli-connid.
+
+* Caso não sejam encontrados registros exibe mensagem de INFORMATION
+      IF sy-subrc NE 0.
+        MESSAGE i001 WITH wa_spfli-connid.
+      ENDIF.
+
+* Atualiza o grid dos itens de Vôo
+      CALL METHOD gr_grid_sflight->refresh_table_display.
+
+    ENDIF.
+  ENDMETHOD.                    "on_hotspot_click
+ENDCLASS.                    "lcl_event_handler IMPLEMENTATION
